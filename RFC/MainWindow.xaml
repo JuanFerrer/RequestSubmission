@@ -1,0 +1,47 @@
+﻿<Window x:Name="window" x:Class="RFC.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:RFC"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="381" Width="536" ResizeMode="CanMinimize">
+    <Grid>
+        <ListView
+                  Height="223" Margin="10,10,0,0" VerticalAlignment="Top" Width="499"
+                  Name="itemList" HorizontalAlignment="Left">
+            <ListView.View>
+                <GridView AllowsColumnReorder="True">
+                    <GridViewColumn Header="Author"                                   
+                                    DisplayMemberBinding="{Binding Author}"
+                                    Width="{Binding authorWidth, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"/>
+                    <GridViewColumn Header="Request"
+                                    DisplayMemberBinding="{Binding Request}"
+                                    Width="{Binding requestWidth, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"/>
+                </GridView>
+            </ListView.View>
+            <ListView.Resources>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Priority}" Value="0">
+                            <Setter Property="Background" Value="#FFCDD2" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Priority}" Value="1">
+                            <Setter Property="Background" Value="#BBDEFB" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Priority}" Value="2">
+                            <Setter Property="Background" Value="#DCEDC8" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.Resources>
+        </ListView>
+        <xctk:WatermarkTextBox x:Name="authorTextBox" HorizontalAlignment="Left" Height="25" Margin="10,238,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="" Watermark="Author"/>
+        <xctk:WatermarkTextBox x:Name="requestTextBox" HorizontalAlignment="Left" Height="25" Margin="135,238,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="374" Text="" Watermark="Request" />
+        <ComboBox x:Name="priorityComboBox" HorizontalAlignment="Left" Margin="10,268,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Source={local:EnumBindingSource {x:Type local:EPriority}}}" SelectedIndex="1"/>
+        <Button x:Name="submitButton" Content="Submit" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10" Width="75" Click="button_Click"/>
+        <Button x:Name="solvedButton" Content="Solved" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,90,10" Width="75" Click="button_Click"/>
+    </Grid>
+</Window>
