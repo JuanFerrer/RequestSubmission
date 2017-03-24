@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:RFC"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="MainWindow" Height="381" Width="536" ResizeMode="CanMinimize">
+        Title="Request Submission" Height="381" Width="536" ResizeMode="CanMinimize" Icon="icon.ico">
     <Grid>
         <ListView
                   Height="223" Margin="10,10,0,0" VerticalAlignment="Top" Width="499"
@@ -42,6 +42,6 @@
         <xctk:WatermarkTextBox x:Name="requestTextBox" HorizontalAlignment="Left" Height="25" Margin="135,238,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="374" Text="" Watermark="Request" />
         <ComboBox x:Name="priorityComboBox" HorizontalAlignment="Left" Margin="10,268,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Source={local:EnumBindingSource {x:Type local:EPriority}}}" SelectedIndex="1"/>
         <Button x:Name="submitButton" Content="Submit" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10" Width="75" Click="button_Click"/>
-        <Button x:Name="solvedButton" Content="Solved" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,90,10" Width="75" Click="button_Click"/>
+        <Button x:Name="solvedButton" Content="Solved" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,90,10" Width="75" Click="button_Click" IsEnabled="{Binding ElementName=itemList, Path=SelectedItems.Count}"/>
     </Grid>
 </Window>
