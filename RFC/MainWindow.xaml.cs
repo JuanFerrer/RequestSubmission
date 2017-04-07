@@ -12,8 +12,8 @@ namespace RFC
     /// </summary>
     public partial class MainWindow : Window
     {
-        const string FILENAME_DB = "DB.txt";
-        const string TEMP_DB = "DB.temp.txt";
+        const string FILENAME_DB = "rfc.db";
+        const string TEMP_DB = "temp.db";
         const char SPLIT_CHAR = '|';
         const string KEY = "123";
         ObservableCollection<Item> items;
@@ -30,6 +30,7 @@ namespace RFC
 
             RetrieveDB();
             PopulateList();
+            Closing += new System.ComponentModel.CancelEventHandler(OnWindowClosing);
         }
 
         /// <summary>
@@ -40,28 +41,9 @@ namespace RFC
             if (File.Exists(FILENAME_DB))
             {
                 DecryptDB(FILENAME_DB, TEMP_DB);
+                HideFile(TEMP_DB);
                 dbContents = File.ReadAllLines(TEMP_DB);
-                if (dbContents.Length == 0)
-                {
-                    bool stop = true;
-                }
             }
-        }
-
-        /// <summary>
-        /// Run cmd with passed arguments
-        /// </summary>
-        /// <param name="encryptedDB"></param>
-        /// <param name="tempDB"></param>
-        private void DecryptDB(string encryptedDB, string tempDB)
-        {
-            System.Diagnostics.Process process = new System.Diagnostics.Process();
-            System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
-            startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-            startInfo.FileName = @"C:\Windows\System32\cmd.exe";
-            startInfo.Arguments = "/C encrypt.exe -d "+ encryptedDB + " " + tempDB + " " + KEY;
-            process.StartInfo = startInfo;
-            process.Start();
         }
 
         /// <summary>
@@ -71,13 +53,44 @@ namespace RFC
         /// <param name="tempDB"></param>
         private void EncryptDB(string tempDB, string encryptedDB)
         {
+            CallEncrypter("/C encrypt.exe -e " + tempDB + " " + encryptedDB + " " + KEY);
+        }
+
+        /// <summary>
+        /// Run cmd with passed arguments
+        /// </summary>
+        /// <param name="encryptedDB"></param>
+        /// <param name="tempDB"></param>
+        private void DecryptDB(string encryptedDB, string tempDB)
+        {
+            CallEncrypter("/C encrypt.exe -d " + encryptedDB + " " + tempDB + " " + KEY);
+        }
+
+        /// <summary>
+        /// Set up process, call and wait for exit
+        /// </summary>
+        /// <param name="parameters"></param>
+        private void CallEncrypter(string parameters)
+        {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
             startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-            startInfo.FileName = "cmd.exe";
-            startInfo.Arguments = "/C encrypt.exe -e " + tempDB + " " + encryptedDB + " " + KEY;
+            startInfo.FileName = @"C:\Windows\System32\cmd.exe";
+            startInfo.Arguments = parameters;
             process.StartInfo = startInfo;
             process.Start();
+            // Wait until process is finished
+            // Can't run asynchronously, because DB might not be ready to be read or written
+            process.WaitForExit();
+        }
+
+        /// <summary>
+        /// Add the hidden attribute to the given file
+        /// </summary>
+        /// <param name="path"></param>
+        void HideFile(string path)
+        {
+            File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.Hidden);
         }
 
         /// <summary>
@@ -99,6 +112,7 @@ namespace RFC
             {
                 RetrieveDB();
                 File.Delete(TEMP_DB);
+
                 Item selectedItem = items[itemList.SelectedIndex];
                 foreach (string str in dbContents)
                 {
@@ -202,7 +216,12 @@ namespace RFC
                 AskForValidRequest(sender);
         }
 
-        void DataWindow_Closing(object sender)
+        /// <summary>
+        /// React to closing window
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             EncryptDB(TEMP_DB, FILENAME_DB);
             File.Delete(TEMP_DB);
