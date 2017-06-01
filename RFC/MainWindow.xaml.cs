@@ -121,6 +121,10 @@ namespace RFC
                 }
                 items.RemoveAt(itemList.SelectedIndex);
             }
+            else if (btn.Content == cancelButton.Content)
+            {
+                Close();
+            }
             SortList();
         }
 
@@ -186,6 +190,8 @@ namespace RFC
                 return authorTextBox.Text != string.Empty && requestTextBox.Text != string.Empty;
             else if (btn.Content == solvedButton.Content)
                 return itemList.SelectedIndex >= 0;
+            else if (btn.Content == cancelButton.Content)
+                return true;
 
             return false;
         }
@@ -223,6 +229,7 @@ namespace RFC
         /// <param name="e"></param>
         public void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            System.Diagnostics.Debug.WriteLine("Closing correctly");
             EncryptDB(TEMP_DB, FILENAME_DB);
             File.Delete(TEMP_DB);
         }
