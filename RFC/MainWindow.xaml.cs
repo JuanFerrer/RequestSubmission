@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
 using System.IO;
+using System;
 using System.Collections.ObjectModel;
-using System.Windows.Controls;
 using System.Linq;
+using System.Windows.Controls;
 
 namespace RFC
 {
@@ -12,7 +13,9 @@ namespace RFC
     /// </summary>
     public partial class MainWindow : Window
     {
-        const string FILENAME_DB = "rfc.db";
+        bool saveOnClose = true;
+        bool promptSureCancel = false;
+        string FILENAME_DB = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\RFC\rfc.db";
         const string TEMP_DB = "temp.db";
         const char SPLIT_CHAR = '|';
         const string KEY = "123";
@@ -26,11 +29,28 @@ namespace RFC
         {
             authorWidth = 100.0;
             InitializeComponent();
+            // Make sure we only allow admin to solve requests
+            if (!AdminChecker.IsAdmin())
+            {
+                solvedButton.Height = 0;
+            }
             requestWidth = itemList.Width - authorWidth - 10;
 
+            SetupDBFolder();
             RetrieveDB();
             PopulateList();
             Closing += new System.ComponentModel.CancelEventHandler(OnWindowClosing);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void SetupDBFolder()
+        {
+            if (!Directory.Exists(Path.GetDirectoryName(FILENAME_DB)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(FILENAME_DB));
+            }
         }
 
         /// <summary>
@@ -107,6 +127,7 @@ namespace RFC
                 File.AppendAllLines(TEMP_DB, new List<string>() { line });
                 authorTextBox.Text = requestTextBox.Text = string.Empty;
                 UpdateList(line);
+                promptSureCancel = true;
             }
             else if (btn.Content == solvedButton.Content)
             {
@@ -120,10 +141,20 @@ namespace RFC
                         File.AppendAllLines(TEMP_DB, new List<string>() { str });
                 }
                 items.RemoveAt(itemList.SelectedIndex);
+                promptSureCancel = true;
             }
             else if (btn.Content == cancelButton.Content)
             {
-                Close();
+                MessageBoxResult result;
+                if (promptSureCancel)
+                {
+                    result = MessageBox.Show("Are you sure you want to close? Your changes won't be saved.", "", MessageBoxButton.YesNo);                    
+                }
+                else
+                {
+
+
+                }
             }
             SortList();
         }
@@ -230,7 +261,10 @@ namespace RFC
         public void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("Closing correctly");
-            EncryptDB(TEMP_DB, FILENAME_DB);
+            if (saveOnClose)
+            {
+                EncryptDB(TEMP_DB, FILENAME_DB);
+            }
             File.Delete(TEMP_DB);
         }
     }
