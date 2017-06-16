@@ -145,15 +145,16 @@ namespace RFC
             }
             else if (btn.Content == cancelButton.Content)
             {
-                MessageBoxResult result;
+                MessageBoxResult result = MessageBoxResult.Yes;
                 if (promptSureCancel)
                 {
-                    result = MessageBox.Show("Are you sure you want to close? Your changes won't be saved.", "", MessageBoxButton.YesNo);                    
+                    result = MessageBox.Show("Are you sure you want to close? Your changes won't be saved.", "", MessageBoxButton.YesNo);          
                 }
-                else
+                if (result == MessageBoxResult.Yes)
                 {
-
-
+                    saveOnClose = false;
+                    this.Close();
+                    return;
                 }
             }
             SortList();
